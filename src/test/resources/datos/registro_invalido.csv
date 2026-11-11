@@ -1,0 +1,5 @@
+caso;nombre;correo;clave;campoError;mensajeEsperado
+CP-WEB-02 nombre vacio;;ana@correo.com;Clave1234;nombre;El nombre es obligatorio
+CP-WEB-03 correo sin arroba;Ana Perez;anacorreo.com;Clave1234;correo;El correo no tiene un formato válido
+CP-WEB-04 clave menor a 8;Ana Perez;ana@correo.com;abc123;clave;La clave debe tener al menos 8 caracteres
+CP-WEB-05 todos vacios;;;;nombre;El nombre es obligatorio

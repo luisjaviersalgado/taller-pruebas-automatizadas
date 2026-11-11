@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registro de usuarios</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 420px; margin: 40px auto; }
+    label { display: block; margin-top: 14px; font-weight: bold; }
+    input { width: 100%; padding: 8px; box-sizing: border-box; }
+    .error { color: #b00020; font-size: 0.9em; display: block; min-height: 1.1em; }
+    .exito { margin-top: 18px; padding: 10px; background: #e6f4ea; color: #1e6b34; }
+    button { margin-top: 18px; padding: 10px 18px; }
+  </style>
+</head>
+<body>
+  <h1>Registro de usuarios</h1>
+
+  <form id="formRegistro" novalidate>
+    <label for="nombre">Nombre</label>
+    <input id="nombre" name="nombre" type="text">
+    <span id="errorNombre" class="error"></span>
+
+    <label for="correo">Correo electrónico</label>
+    <input id="correo" name="correo" type="email">
+    <span id="errorCorreo" class="error"></span>
+
+    <label for="clave">Clave</label>
+    <input id="clave" name="clave" type="password">
+    <span id="errorClave" class="error"></span>
+
+    <button type="submit" id="btnRegistrar">Registrar</button>
+  </form>
+
+  <div id="mensajeExito" class="exito" hidden></div>
+  <span id="mensajeFallo" class="error"></span>
+
+  <script>
+    const CAMPOS = ['nombre', 'correo', 'clave'];
+    const idError = c => 'error' + c.charAt(0).toUpperCase() + c.slice(1);
+
+    function limpiar() {
+      CAMPOS.forEach(c => document.getElementById(idError(c)).textContent = '');
+      document.getElementById('mensajeFallo').textContent = '';
+      document.getElementById('mensajeExito').hidden = true;
+    }
+
+    function validar(d) {
+      const e = {};
+      if (!d.nombre.trim()) e.nombre = 'El nombre es obligatorio';
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.correo)) e.correo = 'El correo no tiene un formato válido';
+      if (d.clave.length < 8) e.clave = 'La clave debe tener al menos 8 caracteres';
+      return e;
+    }
+
+    document.getElementById('formRegistro').addEventListener('submit', async ev => {
+      ev.preventDefault();
+      limpiar();
+      const datos = {
+        nombre: document.getElementById('nombre').value,
+        correo: document.getElementById('correo').value,
+        clave: document.getElementById('clave').value
+      };
+      const errores = validar(datos);
+      if (Object.keys(errores).length > 0) {
+        for (const c in errores) document.getElementById(idError(c)).textContent = errores[c];
+        return;
+      }
+      try {
+        const r = await fetch('/api/usuarios', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(datos)
+        });
+        if (r.status === 201) {
+          const u = await r.json();
+          const caja = document.getElementById('mensajeExito');
+          caja.textContent = 'Registro exitoso. Bienvenido, ' + u.nombre + '.';
+          caja.hidden = false;
+        } else {
+          document.getElementById('mensajeFallo').textContent = 'No fue posible completar el registro';
+        }
+      } catch (e) {
+        document.getElementById('mensajeFallo').textContent = 'No fue posible completar el registro';
+      }
+    });
+  </script>
+</body>
+</html>
